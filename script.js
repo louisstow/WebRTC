@@ -69,7 +69,7 @@ pc.onicecandidate = function (e) {
 	first = true;
 
 	recv(ROOM, "candidate:" + otherType, function (candidate) {
-		console.log("GET CANDIDATE");
+		console.log("GET CANDIDATE", otherType);
 		pc.addIceCandidate(new IceCandidate(JSON.parse(candidate)));
 	});
 
@@ -78,6 +78,7 @@ pc.onicecandidate = function (e) {
 
 //datachannel or audio/video?
 var channel = pc.createDataChannel("RTCDataChannel", {});
+channel.onmessage = function (e) { console.log("pre channel message", e); }
 
 pc.ondatachannel = function (e) { 
 	console.log("channel data on"); 
