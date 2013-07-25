@@ -86,7 +86,7 @@ pc.ondatachannel = function (e) {
 	channel.onopen = function () { console.log("channel opened"); }
 	channel.onerror = function (e) { console.log("channel error", e); }
 	channel.onmessage = function (e) { console.log("channel message", e); }
-	channel.onclose = function (e) { console.log("channel closed", e); }
+	channel.onclose = function (e) { console.log("channel closed", e); roomRef.remove(); }
 }
 
 var constraints = {
