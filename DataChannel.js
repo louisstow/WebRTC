@@ -142,8 +142,8 @@ DataChannel.prototype = {
 
 	_onIceCandidate: function (e) {
 		// take the first candidate, do nothing if empty candidate
-		if (this._firstCandidate || !e.candidate) { return; }
-		this._firstCandidate = true;
+		if (!e.candidate) { return; }
+		this.pc.onicecandidate = null;
 
 		// listen for the other peers ICE candidate
 		this.broker.recv("candidate:" + this.otherType, function (candidate) {
@@ -173,7 +173,22 @@ DataChannel.id = function () {
 	return s4() + "-" + s4() + "-" + s4() + "-" + s4();
 }
 
-// define the Firebase broker
+/**
+* The Broker handles the required exchange information like
+* offer/answer SDP and ICE candidates.
+*
+* You may write your own broker and host it yourself by
+* implementing the following interface:
+*
+* send (String key, String data): 
+*	Send a string with a unique key
+* recv (String key, Function handler): 
+*	Get data by unique key and execute handler (execute again if value changes)
+* recvOnce (String key, Function Handler):
+*	Get data by unique key and execute handler once (ignore value change).
+* end (String peerType): 
+*	Alert the server that the peer has ended communication.
+*/
 DataChannel.FireBase = function (url) {
 	this.dbRef = new Firebase(url || "https://webrtcdemo.firebaseIO.com/");
 	this.roomRef = this.dbRef.child("rooms");
