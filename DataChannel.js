@@ -46,18 +46,6 @@ function DataChannel (room, broker) {
 	this.pc = new PeerConnection(SERVER, OPTIONS);
 	this.pc.onicecandidate = this._onIceCandidate.bind(this);
 
-	// create the data channel
-	this.channel = this.pc.createDataChannel(room, {});
-
-	// Firefox requires waiting 'til this event
-	// is called before listening to channel events
-	this.pc.ondatachannel = function (e) {
-		this._bindDataChannel(e.channel);
-	}.bind(this);
-
-	// Chrome is the opposite
-	this._bindDataChannel(this.channel);
-
 	window.addEventListener("unload", function () {
 		this.broker.end(this.peerType);
 	}.bind(this), true);
@@ -85,6 +73,10 @@ DataChannel.prototype = {
 	},
 
 	offererConnect: function () {
+		// create the data channel
+		this.channel = this.pc.createDataChannel(room, {});
+		this._bindDataChannel();
+
 		// generate an offer SDP and send it
 		this.pc.createOffer(function (offer) {
 			this.pc.setLocalDescription(offer);
@@ -102,6 +94,12 @@ DataChannel.prototype = {
 	},
 
 	answererConnect: function () {
+		// answerer retrives channel from peer connection
+		this.pc.ondatachannel = function (e) {
+			this.channel = e.channel;
+			this._bindDataChannel();
+		}.bind(this);
+
 		// wait for an offer
 		this.broker.recv("offer", function (offer) {
 			if (!offer) { return; }
@@ -155,11 +153,12 @@ DataChannel.prototype = {
 		this.broker.send("candidate:" + this.peerType, JSON.stringify(e.candidate));
 	},
 
-	_bindDataChannel: function (chan) {
-		chan.onopen = this.emit.bind(this, "open");
-		chan.onerror = this.emit.bind(this, "error");
-		chan.onmessage = this.emit.bind(this, "message");
-		chan.onclose = this.emit.bind(this, "close");
+	_bindDataChannel: function () {
+		var channel = this.channel;
+		channel.onopen = this.emit.bind(this, "open");
+		channel.onerror = this.emit.bind(this, "error");
+		channel.onmessage = this.emit.bind(this, "message");
+		channel.onclose = this.emit.bind(this, "close");
 	}
 }
 
