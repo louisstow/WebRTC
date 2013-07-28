@@ -78,7 +78,7 @@ var server = {
 var options = {
 	optional: [
 		{DtlsSrtpKeyAgreement: true},
-		{RtpDataChannels: true}
+		{RtpDataChannels: true} //required for Firefox
 	]
 }
 
@@ -110,7 +110,10 @@ connect();
 // start the connection!
 function connect () {
 	if (type === "offerer") {
+		// offerer creates the data channel
 		channel = pc.createDataChannel("my channel", {});
+
+		// can bind events right away
 		bindEvents();
 
 		// create the offer SDP
@@ -129,9 +132,10 @@ function connect () {
 		}, errorHandler, constraints);
 
 	} else {
+		// answerer must wait for the data channel
 		pc.ondatachannel = function (e) {
 			channel = e.channel;
-			bindEvents();
+			bindEvents(); //now bind the events
 		};
 
 		// answerer needs to wait for an offer before
@@ -152,13 +156,17 @@ function connect () {
 	}
 }
 
+// bind the channel events
 function bindEvents () {
 	channel.onopen = function () { console.log("Channel Open"); }
 	channel.onmessage = function (e) {
+		// add the message to the chat log
 		chatlog.innerHTML += "<div>Peer says: " + e.data + "</div>";
 	};
 }
 
+// send a message the textbox throught
+// the data channel for a chat program
 function sendMessage () {
 	var msg = message.value;
 	channel.send(msg);
