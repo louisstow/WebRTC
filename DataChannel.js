@@ -18,12 +18,7 @@ var OPTIONS = {
 };
 
 // Offer/Answer SDP constraints
-var CONSTRAINTS = {
-	mandatory: {
-        OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true
-    }
-};
+var CONSTRAINTS = {};
 
 // shims for all the browser prefixes
 var SessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
@@ -74,7 +69,7 @@ DataChannel.prototype = {
 
 	offererConnect: function () {
 		// create the data channel
-		this.channel = this.pc.createDataChannel(room, {});
+		this.channel = this.pc.createDataChannel(this.room, {});
 		this._bindDataChannel();
 
 		// generate an offer SDP and send it
