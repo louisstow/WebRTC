@@ -111,7 +111,7 @@ connect();
 function connect () {
 	if (type === "offerer") {
 		// offerer creates the data channel
-		channel = pc.createDataChannel("my channel", {});
+		channel = pc.createDataChannel("mychannel", {});
 
 		// can bind events right away
 		bindEvents();
